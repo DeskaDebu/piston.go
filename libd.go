@@ -16,6 +16,7 @@ func libraryPathFromName(name string) string {
 	if len(parts) < 3 {
 		log.Fatalf("Invalid library name: %s", name)
 	}
+
 	group := strings.ReplaceAll(parts[0], ".", "/")
 	artifact := parts[1]
 	version := parts[2]
@@ -26,7 +27,8 @@ func libraryPathFromName(name string) string {
 	}
 	jarName += ".jar"
 
-	return filepath.Join(group, artifact, version, jarName)
+	// Użyj path.Join, nie filepath.Join — path jest dla URL-i
+	return strings.ReplaceAll(filepath.Join(group, artifact, version, jarName), "\\", "/")
 }
 
 func fileExists(path string) bool {

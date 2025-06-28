@@ -72,6 +72,26 @@ func (launcher PistonLauncher) DownloadVersion(url string) *VersionMeta {
 	return meta
 }
 
+func (launcher PistonLauncher) DownloadFabricVersion(url string, version string, loader string) *VersionMeta {
+	meta := fetchVersionManifest(url)
+	fabricMeta := fetchFabricLoaderMeta(version, loader)
+
+	if fabricMeta == nil {
+		log.Fatalf("Couldn't find %s with loader %s.", version, loader)
+	}
+
+	meta = fabricMeta.patchVersionManifest(meta)
+
+	downloadClientJar(meta, launcher.BasePath)
+	for _, lib := range meta.Libraries {
+		downloadLibrary(lib, launcher.BasePath)
+	}
+	downloadNatives(meta, launcher.BasePath)
+	downloadAssets(meta, launcher.BasePath)
+
+	return meta
+}
+
 func (launcher PistonLauncher) LaunchVersion(version string, xmx uint32, username string, accessToken string, uuid string, userType string, clientId string, versionType string) {
 	meta, err := loadVersionManifest(launcher.BasePath, version)
 	if err != nil {

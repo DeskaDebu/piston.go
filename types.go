@@ -135,3 +135,68 @@ type AssetObject struct {
 	Hash string `json:"hash"`
 	Size int    `json:"size"`
 }
+
+type FabricManifest struct {
+	Game   []struct {
+		Version string
+		Stable  bool
+	} `json:"game"`
+}
+
+type FabricMeta struct {
+	Loader       FabricLoader       `json:"loader"`
+	LauncherMeta FabricLauncherMeta `json:"launcherMeta"`
+}
+
+type FabricLoader struct {
+	Separator string `json:"separator"`
+	Build     uint32 `json:"build"`
+	Maven     string `json:"maven"`
+	Version   string `json:"version"`
+	Stable    bool   `json:"stable"`
+}
+
+type FabricLauncherMeta struct {
+	Version   uint32          `json:"version"`
+	Libraries FabricLibraries `json:"libraries"`
+	MainClass FabricMainClass `json:"mainClass"`
+}
+
+type FabricLibraries struct {
+	Client []FabricLibrary `json:"client"`
+	Common []FabricLibrary `json:"common"`
+	Server []FabricLibrary `json:"server"`
+}
+
+type FabricLibrary struct {
+	Name string `json:"name"`
+	Url  string `json:"url,omitempty"`
+	Sha1 string `json:"sha1,omitempty"`
+	Size int    `json:"size,omitempty"`
+}
+
+type FabricMainClass struct {
+	Client string `json:"client,omitempty"`
+	Server string `json:"server,omitempty"`
+}
+
+func (f *FabricMainClass) UnmarshalJSON(data []byte) error {
+	var asString string
+	if err := json.Unmarshal(data, &asString); err == nil {
+		f.Client = asString
+		f.Server = asString
+		return nil
+	}
+
+	var asObject struct {
+		Client string `json:"client"`
+		Server string `json:"server"`
+	}
+	if err := json.Unmarshal(data, &asObject); err != nil {
+		return err
+	}
+
+	f.Client = asObject.Client
+	f.Server = asObject.Server
+	return nil
+}
