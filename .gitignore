@@ -1,0 +1,19 @@
+# Piston test artifacts
+minecraft/
+
+# Go build artifacts
+bin/
+*.exe
+*.out
+*.test
+
+# IDE
+.vscode/
+.idea/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Go cache
+*.log
