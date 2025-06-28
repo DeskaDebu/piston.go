@@ -1,3 +1,3 @@
-module github.com/Kot2000/Piston
+module github.com/DeskaDebu/Piston
 
 go 1.24.4
