@@ -20,6 +20,7 @@ var ignoredArgs = map[string]bool{
 	"--width": true,
 	"--height": true,
 	"--demo": true,
+	"--xuid": true,
 }
 
 func replaceVars(s string, vars map[string]string) string {

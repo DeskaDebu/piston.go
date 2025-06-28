@@ -1,6 +1,8 @@
 package piston
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"os/exec"
@@ -70,7 +72,7 @@ func (launcher PistonLauncher) DownloadVersion(url string) *VersionMeta {
 	return meta
 }
 
-func (launcher PistonLauncher) LaunchVersion(version string, xmx uint32, username string, accessToken string, uuid string, userType string, clientId string, xuid string, versionType string) {
+func (launcher PistonLauncher) LaunchVersion(version string, xmx uint32, username string, accessToken string, uuid string, userType string, clientId string, versionType string) {
 	meta, err := loadVersionManifest(launcher.BasePath, version)
 	if err != nil {
 		log.Fatalf("Failed to load version: %s", err)
@@ -87,7 +89,6 @@ func (launcher PistonLauncher) LaunchVersion(version string, xmx uint32, usernam
 		"auth_uuid":           uuid,
 		"user_type":           userType,
 		"clientid":            clientId,
-		"auth_xuid":           xuid,
 		"version_type":        "piston.go-" + versionType,
 		"user_properties":      "{}",
 	}
@@ -115,4 +116,26 @@ func (launcher PistonLauncher) LaunchVersion(version string, xmx uint32, usernam
 	if err != nil {
 		log.Fatalf("Minecraft process failed: %s", err)
 	}
+}
+
+func (launcher PistonLauncher) GenerateOfflineUUID(username string) string {
+	data := []byte("OfflinePlayer:" + username)
+	hash := md5.Sum(data)
+
+	// Format as UUID v3 (name-based UUID, MD5)
+	hash[6] = (hash[6] & 0x0f) | 0x30
+	hash[8] = (hash[8] & 0x3f) | 0x80
+
+	uuid := make([]byte, 36)
+	hex.Encode(uuid[0:8], hash[0:4])
+	uuid[8] = '-'
+	hex.Encode(uuid[9:13], hash[4:6])
+	uuid[13] = '-'
+	hex.Encode(uuid[14:18], hash[6:8])
+	uuid[18] = '-'
+	hex.Encode(uuid[19:23], hash[8:10])
+	uuid[23] = '-'
+	hex.Encode(uuid[24:], hash[10:])
+
+	return string(uuid)
 }
